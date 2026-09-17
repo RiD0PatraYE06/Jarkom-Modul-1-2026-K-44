@@ -849,173 +849,573 @@ Pada port 22 dan 80 yang terbuka, Knights merespons SYN dari Alice dengan SYN-AC
 
 ---
 
-## Soal 14 
+## Soal 13
 
-### Tujuan:
+---
 
-* IP adress attacker
-* Target IP dan Port
-* Password lain_admin
-* Versi web server
+## Soal 14 — Analisis `wired_bruteforce.pcapng`
 
-### Langkah
-1. Buka `wired_bruteforce.pcapng` di Wireshark.
-2. Filter request login:
-   ```wireshark
-   http.request.method == "POST"
-   ```
-3. Cari username dengan:
-   ```wireshark
-   tcp contains "lain_admin"
-   ```
-4. Buka packet `POST /login.php` dan lihat **Source** serta **Destination**.
-5. Lihat bagian **TCP** untuk port tujuan.
-6. Gunakan **Follow → TCP Stream** untuk melihat username dan password.
-7. Pada HTTP response, cari header `Server:`.
-8. Validasi:
-   ```bash
-   nc 10.4.89.247 3401
-   ```
+### Tujuan
+Menemukan 5 hal dari file capture:
+1. IP attacker
+2. IP + port target
+3. Password user `lain_admin`
+4. Jenis & versi web server
+5. Validasi jawaban lewat socket
 
-### Hasil
-| Parameter | Hasil |
-|---|---|
-| IP Attacker | `172.26.7.50` |
-| IP Target | `172.26.7.100` |
-| Port Target | `8080` |
-| Username | `lain_admin` |
-| Password | `wired_pr0tocol_7` |
-| Web Server | `Apache/2.4.62` |
-| Status Login | `HTTP/1.1 200 OK` — Login successful |
+### Langkah 1 — Buka File PCAP
+
+Di Wireshark:
+```
+File → Open → wired_bruteforce.pcapng
+```
+
+### Langkah 2 — Cari Request Login
+
+Terapkan filter:
+```
+http.request.method == "POST"
+```
+
+Kalau mau langsung cari berdasarkan username, bisa pakai:
+```
+tcp contains "lain_admin"
+```
+atau
+```
+frame contains "lain_admin"
+```
+
+### Langkah 3 — Identifikasi IP Attacker & Target
+
+Klik paket `POST /login.php HTTP/1.1`, lalu lihat:
+- **Source** → IP attacker
+- **Destination** → IP target
+
+✅ Hasil:
+| Keterangan   | Nilai         |
+|--------------|---------------|
+| IP Attacker  | 172.26.7.50   |
+| IP Target    | 172.26.7.100  |
+
+### Langkah 4 — Cari Port Target
+
+Masih di paket yang sama, buka bagian **Transmission Control Protocol → Dst Port**.
+
+✅ Hasil: port `8080` → target lengkap: **172.26.7.100:8080**
+
+### Langkah 5 — Temukan Password `lain_admin`
+
+Klik kanan paket yang mengandung `username=lain_admin` → **Follow → TCP Stream**.
+
+Di dalam stream akan terlihat:
+```
+username=lain_admin
+password=wired_pr0tocol_7
+```
+Diikuti response sukses:
+```
+HTTP/1.1 200 OK
+Success! Login successful.
+```
+
+### Langkah 6 — Identifikasi Web Server
+
+Terapkan filter:
+```
+http.response
+```
+atau lebih spesifik:
+```
+http.response && http contains "Server:"
+```
+
+✅ Hasil: `Server: Apache/2.4.62`
+
+### Langkah 7 — Validasi via Socket
+
+Jalankan di terminal:
+```bash
+nc 10.4.89.247 3401
+```
+Jawab pertanyaan yang muncul sesuai urutan prompt, dengan jawaban:
+```
+172.26.7.50
+172.26.7.100:8080
+wired_pr0tocol_7
+Apache/2.4.62
+```
+⚠️ Jangan ikut mengetik karakter `>` — itu hanya tanda prompt, bukan bagian dari jawaban.
+
+### Hasil Soal 14
+
+| Item          | Hasil                     |
+|---------------|---------------------------|
+| IP Attacker   | 172.26.7.50               |
+| Target        | 172.26.7.100:8080         |
+| Username      | lain_admin                |
+| Password      | wired_pr0tocol_7          |
+| Web Server    | Apache/2.4.62             |
+| Socket        | `nc 10.4.89.247 3401`     |
 | Flag | `KOMJAR26{W1r3d_Brut3_AAjooeohgP3C6K4cHa0NyAQAG}` |
 
----
 
-## Soal 15 
+## Filter Wireshark
+
+**Soal 14**
+```
+http
+http.request
+http.request.method == "POST"
+tcp contains "lain_admin"
+frame contains "lain_admin"
+http.response
+http.response && http contains "Server:"
+```
+---
+## Soal 15 — Analisis `wired_usb_hid.pcap` (USB HID Keyboard)
 
 ### Tujuan
+Menemukan 4 hal dari file capture:
+1. Vendor ID (VID) perangkat USB
+2. Product ID (PID) perangkat USB
+3. Device address perangkat
+4. Pesan rahasia hasil rekaman keystroke
+5. Validasi jawaban lewat socket
 
-Menganalisis `wired_usb_hid.pcap` untuk menemukan Vendor ID, Product ID, alamat device USB, dan pesan rahasia dari keystroke keyboard HID.
+### Langkah 1 — Buka File PCAP
 
-### Langkah
-1. Buka `wired_usb_hid.pcap` di Wireshark.
-2. Filter:
-   ```wireshark
-   usb
-   ```
-3. Buka **GET DESCRIPTOR Response DEVICE** untuk melihat Device Descriptor.
-4. Catat `idVendor` dan `idProduct`.
-5. Pada packet `INTERRUPT` keyboard, catat `Device address`.
-6. Periksa **Leftover Capture Data** untuk membaca HID keycode dan modifier.
-7. Susun keystroke dari atas ke bawah hingga menjadi pesan rahasia.
-8. Validasi:
-   ```bash
-   nc 10.4.89.247 3402
-   ```
+Di Wireshark:
+```
+File → Open → wired_usb_hid.pcap
+```
 
-### Hasil
-| Parameter | Hasil |
-|---|---|
-| Vendor ID (VID) | `0x046d` |
-| Product ID (PID) | `0xc31c` |
-| USB Device Address | `7` |
-| Pesan rahasia | **Wired_protocol_7_is_alive_2026** |
-| Flag | `KOMJAR26{USB_K3ystr0k3_fVuUjFmLbe0Am4cid1YVdfeB6}` | 
+### Langkah 2 — Tampilkan Traffic USB
+
+Terapkan filter:
+```
+usb
+```
+Cari packet yang berisi *device descriptor* (informasi identitas perangkat).
+
+### Langkah 3 — Identifikasi Vendor ID & Product ID
+
+Cari packet:
+```
+GET DESCRIPTOR Response DEVICE
+```
+Klik packet tersebut, lalu buka **USB → Device Descriptor**.
+
+✅ Hasil:
+| Item      | Nilai    | Keterangan            |
+|-----------|----------|------------------------|
+| idVendor  | 0x046d   | Logitech, Inc.         |
+| idProduct | 0xc31c   | Keyboard K120           |
+
+### Langkah 4 — Identifikasi Device Address
+
+⚠️ Jangan pakai angka `0` dari packet descriptor awal — itu bukan device address yang dimaksud. Cari packet **interrupt** milik keyboard/HID.
+
+Terapkan filter:
+```
+usb.capdata && usb.device_address == 7
+```
+Pada bagian **USB URB**, akan terlihat:
+```
+Device address: 7
+```
+✅ Hasil: **Device Address = 7**
+
+### Langkah 5 — Decode Pesan Rahasia dari Keystroke
+
+Gunakan filter yang sama:
+```
+usb.capdata && usb.device_address == 7
+```
+Perhatikan kolom **Leftover Capture Data** pada setiap paket.
+
+- Abaikan report yang isinya semua nol: `0000000000000000` (artinya tidak ada tombol ditekan)
+- Cari report yang punya byte non-zero, contoh: `02001a0000000000`
+
+Cara membaca 1 report HID keyboard (8 byte):
+```
+Byte 1 = Modifier (misal 02 = Left Shift)
+Byte 3 = Keycode tombol yang ditekan (misal 1a = tombol W)
+```
+Jadi `02001a0000000000` → Shift + W → karakter **`W`**
+
+⚠️ **Penting:** untuk mendapatkan pesan rahasia yang benar, decode **seluruh 8-byte HID report** satu per satu (termasuk byte modifier-nya), jangan hanya melihat byte keycode saja — karena huruf besar/kecil ditentukan oleh modifier Shift.
+
+### Langkah 6 — Validasi via Socket
+
+Jalankan di terminal:
+```bash
+nc 10.4.89.247 3402
+```
+Jawab sesuai urutan prompt yang muncul:
+```
+Vendor ID       → 0x046d
+Product ID      → 0xc31c
+Device Address  → 7
+Secret Message  → (hasil decoding lengkap dari Langkah 5)
+```
+⚠️ Jangan menebak kapitalisasi atau karakter kalau validator menolak — pastikan hasil decoding benar-benar berasal dari seluruh HID report, bukan cuma byte keycode.
+
+### Ringkasan Hasil Soal 15
+
+| Item            | Hasil                          |
+|-----------------|---------------------------------|
+| Vendor ID       | 0x046d                          |
+| Product ID      | 0xc31c                          |
+| Device Address  | 7                                |
+| Secret Message  | *(isi hasil final validator)*   |
+| Socket          | `nc 10.4.89.247 3402`           |
+| Flag | `KOMJAR26{USB_K3ystr0k3_fVuUjFmLbe0Am4cid1YVdfeB6}` |
+
+
+## Filter Wireshark
+
+**Soal 15**
+```
+usb
+usb.capdata
+usb.capdata && usb.device_address == 7
+```
+
 
 ---
 
-## Soal 16 
+## Soal 16 — Analisis `wired_ftp_theft.pcap` (FTP Theft)
 
 ### Tujuan
+Menemukan 5 hal dari file capture:
+1. IP server FTP
+2. Banner software FTP
+3. Username attacker
+4. Password attacker
+5. Ukuran file yang dicuri (`knights_payload.exe`)
+6. Validasi jawaban lewat socket
 
-Menganalisis `wired_ftp_theft.pcap` untuk menemukan IP server FTP, banner software, kredensial attacker, dan ukuran file `knights_payload.exe`.
+### Langkah 1 — Buka File PCAP
 
-### Langkah
-1. Buka `wired_ftp_theft.pcap` di Wireshark.
-2. Filter:
-   ```wireshark
-   ftp
-   ```
-3. Cari response `220` untuk banner FTP.
-4. Cari request `USER` dan `PASS` untuk kredensial.
-5. Cari:
-   ```wireshark
-   ftp.request.command == "RETR"
-   ```
-   lalu pilih `RETR knights_payload.exe`.
-6. Cari `SIZE knights_payload.exe` dan response `213` untuk ukuran file.
-7. Validasi:
-   ```bash
-   nc 10.4.89.247 3403
-   ```
+```
+File → Open → wired_ftp_theft.pcap
+```
 
-### Hasil
-| Parameter | Hasil |
-|---|---|
-| IP Server FTP | `198.51.100.7` |
-| Banner / Software | `vsftpd 3.0.5` |
-| Username | `knights_agent` |
-| Password | `N4v1_s3cur3_2026` |
-| File | `knights_payload.exe` |
-| File Size | `524288` |
+### Langkah 2 — Tampilkan Traffic FTP
+
+Terapkan filter:
+```
+ftp
+```
+
+### Langkah 3 — Identifikasi Banner FTP & IP Server
+
+Cari response:
+```
+220 Welcome to Wired FTP Server (vsftpd 3.0.5)
+```
+Pada packet ini, lihat kolom **Source** → itu adalah IP server FTP.
+
+✅ Hasil:
+| Item         | Nilai            |
+|--------------|-------------------|
+| IP Server    | 198.51.100.7      |
+| Banner       | vsftpd 3.0.5      |
+
+### Langkah 4 — Identifikasi Username
+
+Terapkan filter:
+```
+ftp.request.command == "USER"
+```
+Ditemukan:
+```
+USER knights_agent
+```
+✅ Hasil: **Username = knights_agent**
+
+### Langkah 5 — Identifikasi Password
+
+Terapkan filter:
+```
+ftp.request.command == "PASS"
+```
+Ditemukan:
+```
+PASS N4v1_s3cur3_2026
+```
+✅ Hasil: **Password = N4v1_s3cur3_2026**
+
+### Langkah 6 — Identifikasi File & Ukurannya
+
+Terapkan filter:
+```
+ftp.request.command == "SIZE"
+```
+Ditemukan:
+```
+SIZE knights_payload.exe
+```
+Response:
+```
+213 524288
+```
+✅ Hasil: **File size = 524288 bytes**
+
+Pastikan file benar-benar diunduh dengan filter:
+```
+ftp.request.command == "RETR"
+```
+Ditemukan:
+```
+RETR knights_payload.exe
+```
+Diikuti response transfer:
+```
+150 Opening BINARY mode data connection for knights_payload.exe (524288 bytes)
+226 Transfer complete.
+```
+
+### Langkah 7 — Validasi via Socket
+
+Jalankan di terminal:
+```bash
+nc 10.4.89.247 3403
+```
+Jawab sesuai urutan prompt:
+```
+IP Server   → 198.51.100.7
+Banner      → vsftpd 3.0.5
+Username    → knights_agent
+Password    → N4v1_s3cur3_2026
+File Size   → 524288
+```
+
+### Ringkasan Hasil Soal 16
+
+| Item          | Hasil                     |
+|---------------|---------------------------|
+| IP FTP Server | 198.51.100.7               |
+| Banner        | vsftpd 3.0.5                |
+| Username      | knights_agent               |
+| Password      | N4v1_s3cur3_2026            |
+| File Size     | 524288 bytes                 |
+| Socket        | `nc 10.4.89.247 3403`       |
 | Flag | `KOMJAR26{FTP_Th3ft_IaANBuM6U4F8KY7MiK3Rj5mgd}` |
 
+### Screenshot yang Diperlukan
+- [ ] Banner FTP (response `220 ...`)
+- [ ] Command `USER` dan `PASS`
+- [ ] Command `SIZE` dan `RETR` untuk `knights_payload.exe`
+- [ ] Hasil validasi `nc 10.4.89.247 3403`
+
 ---
 
-## Soal 17 
+## Filter Wireshark
+
+**Soal 16**
+```
+ftp
+ftp.request.command == "USER"
+ftp.request.command == "PASS"
+ftp.request.command == "RETR"
+ftp.request.command == "SIZE"
+ftp.response.code == 220
+ftp-data
+```
+
+## Referensi Command Validasi
+
+| Soal | Command                  |
+|------|---------------------------|
+| 15   | `nc 10.4.89.247 3402`     |
+| 16   | `nc 10.4.89.247 3403`     |
+
+---
+
+## Checklist Akhir
+
+### Soal 15
+- [ ] File `wired_usb_hid.pcap` berhasil dibuka
+- [ ] Vendor ID ditemukan (0x046d)
+- [ ] Product ID ditemukan (0xc31c)
+- [ ] Device Address ditemukan (7)
+- [ ] Pesan rahasia berhasil di-decode dari seluruh HID report
+- [ ] Validasi socket port 3402 berhasil
+- [ ] Screenshot lengkap
+
+### Soal 16
+- [ ] File `wired_ftp_theft.pcap` berhasil dibuka
+- [ ] IP server FTP ditemukan (198.51.100.7)
+- [ ] Banner FTP ditemukan (vsftpd 3.0.5)
+- [ ] Username ditemukan (knights_agent)
+- [ ] Password ditemukan (N4v1_s3cur3_2026)
+- [ ] Ukuran file ditemukan (524288 bytes)
+- [ ] Validasi socket port 3403 berhasil
+- [ ] Screenshot lengkap
+
+---
+
+## Soal 17 — Analisis `wired_http_c2.pcap`
 
 ### Tujuan
-Menganalisis `wired_http_c2.pcap` untuk menemukan domain `Host`, IP server penyerang, nama file executable, dan status HTTP.
+Menemukan 4 hal dari file capture:
+1. Domain pada header Host
+2. IP server penyerang
+3. Nama file executable yang diunduh
+4. HTTP status code
+5. Validasi jawaban lewat socket
 
-### Langkah
-1. Buka `wired_http_c2.pcap` di Wireshark.
-2. Filter:
-   ```wireshark
-   http
-   ```
-3. Cari request GET yang mengunduh executable.
-4. Catat nilai `Host` pada HTTP request.
-5. Lihat **Destination IP** request sebagai IP server.
-6. Catat nama file dari URL atau `Content-Disposition`.
-7. Lihat HTTP response untuk status code.
-8. Validasi:
-   ```bash
-   nc 10.4.89.247 3404
-   ```
+### Langkah 1 — Buka File PCAP
 
-### Hasil
-| Parameter | Hasil |
-|---|---|
-| Host / Domain | `wired-update.net` |
-| IP Server Penyerang | `203.0.113.42` |
-| File Executable | `navi_agent.exe` |
-| HTTP Status Code | `200` |
+```
+File → Open → wired_http_c2.pcap
+```
+
+### Langkah 2 — Cari Traffic HTTP
+
+Filter umum:
+```
+http
+```
+Lebih spesifik ke request saja:
+```
+http.request
+```
+
+### Langkah 3 — Cari Download Malware
+
+Filter:
+```
+http.request.method == "GET"
+```
+atau langsung cari nama file:
+```
+tcp contains "navi_agent.exe"
+```
+
+Request yang ditemukan:
+```
+GET /navi_agent.exe HTTP/1.1
+```
+
+### Langkah 4 — Identifikasi Domain (Host)
+
+Pada header HTTP request, cari baris:
+```
+Host: wired-update.net
+```
+✅ Hasil: `wired-update.net`
+
+### Langkah 5 — Identifikasi IP Server
+
+Pada packet request yang sama, lihat kolom **Destination**.
+
+✅ Hasil: `203.0.113.42`
+
+### Langkah 6 — Identifikasi Nama File Executable
+
+Terlihat dari request maupun response:
+```
+GET /navi_agent.exe HTTP/1.1
+filename="navi_agent.exe"
+```
+✅ Hasil: `navi_agent.exe`
+
+### Langkah 7 — Cek HTTP Status Code
+
+Pada HTTP response:
+```
+HTTP/1.1 200 OK
+```
+✅ Hasil: `200`
+
+### Langkah 8 — Validasi via Socket
+
+Jalankan:
+```bash
+nc 10.4.89.247 3404
+```
+Jawab sesuai urutan prompt:
+```
+wired-update.net
+203.0.113.42
+navi_agent.exe
+200
+```
+
+### Hasil Soal 17
+
+| Item          | Hasil                     |
+|---------------|---------------------------|
+| Domain/Host   | wired-update.net          |
+| IP Server     | 203.0.113.42               |
+| File          | navi_agent.exe             |
+| HTTP Status   | 200                         |
+| Socket        | `nc 10.4.89.247 3404`      |
 | Flag | `KOMJAR26{Navi_C2_D0wnl04d_m50RvxYQlKDy89iXKyJR0az5R}` |
 
-## Ringkasan Validator
+### Screenshot yang Diperlukan
+- [ ] Paket `GET /navi_agent.exe` beserta header Host
+- [ ] Source/Destination yang menunjukkan IP server
+- [ ] Response `200 OK` beserta nama file
+- [ ] Hasil validasi `nc 10.4.89.247 3404`
 
-| Soal | Socket Validator |
-|---|---|
-| 14 | `nc 10.4.89.247 3401` |
-| 15 | `nc 10.4.89.247 3402` |
-| 16 | `nc 10.4.89.247 3403` |
-| 17 | `nc 10.4.89.247 3404` |
+---
 
-## Screenshot yang Dikumpulkan
-- **No. 14:** request `POST /login.php`, password `lain_admin`, dan header `Server`.
-- **No. 15:** Device Descriptor, packet HID, keystroke, dan hasil `nc`.
-- **No. 16:** banner FTP, `USER/PASS`, `SIZE/213`, `RETR`, dan hasil `nc`.
-- **No. 17:** HTTP request (`Host` + file), response `200 OK`, dan hasil `nc`.
+## Filter Wireshark
+
+**Soal 17**
+```
+http
+http.request
+http.request.method == "GET"
+tcp contains "navi_agent.exe"
+frame contains "navi_agent.exe"
+http.response
+```
+
+---
+
+## Checklist Akhir
+
+### Soal 14
+- [ ] File `wired_bruteforce.pcapng` berhasil dibuka
+- [ ] IP attacker teridentifikasi (172.26.7.50)
+- [ ] IP + port target teridentifikasi (172.26.7.100:8080)
+- [ ] Password `lain_admin` ditemukan via TCP Stream
+- [ ] Versi web server ditemukan (Apache/2.4.62)
+- [ ] Validasi socket port 3401 berhasil
+- [ ] Screenshot lengkap
+
+### Soal 17
+- [ ] File `wired_http_c2.pcap` berhasil dibuka
+- [ ] Domain/Host teridentifikasi (wired-update.net)
+- [ ] IP server teridentifikasi (203.0.113.42)
+- [ ] Nama file executable ditemukan (navi_agent.exe)
+- [ ] HTTP status code ditemukan (200)
+- [ ] Validasi socket port 3404 berhasil
+- [ ] Screenshot lengkap
+
 
 ---
 
 ## Soal 18
 
+| Flag | `KOMJAR26{SMB_Tr4nsf3r_kpOj6Kwh8azA32lpWii7iZ3ru}` |
+
 ---
 
 ## Soal 19
 
+| Flag | `KOMJAR26{SMTP_Ext0rt10n_ljhaA4kVFGHME79UJ16Dsvtj4}` |
+
 ---
 
 ## Soal 20
+
+| Flag | `KOMJAR26{TLS_D3crypt_2NNInj3GnS9dnJCfsvLefyIyJ}` |
+
+---
 

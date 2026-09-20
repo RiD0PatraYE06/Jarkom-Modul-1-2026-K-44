@@ -1,20 +1,24 @@
 # Jarkom-Modul-1-2026-K-44
 
-## **Soal 1: Topologi & Konfigurasi Alokasi IP Address**
+| Nama |  NRP |
+| --- | --- |
+| Nayarfa Syamahira Dyananta | 5027251046 |
+| Rido Patra Yudhistira Edwin | 5027251120 |
+
+## **Soal 1: Topologi & Konfigurasi IP Address**
 
 > **Deskripsi Soal:**
 > Lain yang berperan sebagai Router membuat tiga Switch/Gateway:
+> 
 > * **Switch 1:** menuju entitas **Alice** dan **Mika**
 > 
 > * **Switch 2:** menuju entitas **Chisa**
 > 
 > * **Switch 3:** menuju entitas **Knights** dan **Eiri**
 > 
-> 
-> 
 > Kelima entitas dikonfigurasi sebagai **Client** di GNS3 menggunakan IP Prefix kelompok.
-> 
-> 
+
+![](./assets/01-Topologi.png)
 
 ---
 
@@ -22,19 +26,19 @@
 
 Berikut adalah pemetaan interface dan pengalamatan IP yang disesuaikan dengan skema Subnetting.
 
-(Catatan: Anda dapat menyesuaikan prefix IP `192.168.x.x` di bawah ini dengan IP prefix kelompok Anda, misalnya `10.4.x.x`).
+Prefix IP: `192.233.x.x`
 
 | Node | Type | Interface | IP Address / Netmask | Default Gateway | Terhubung Ke |
 | --- | --- | --- | --- | --- | --- |
 | **Lain** | Router | `eth0` | DHCP (NAT) | Auto (dari NAT) | Internet / NAT GNS3 |
-|  |  | `eth1` | `192.168.1.1/24` | - | Switch 1 |
-|  |  | `eth2` | `192.168.2.1/24` | - | Switch 2 |
-|  |  | `eth3` | `192.168.3.1/24` | - | Switch 3 |
-| **Alice** | Client | `eth0` | `192.168.1.2/24` | `192.168.1.1` | Switch 1 |
-| **Mika** | Client | `eth0` | `192.168.1.3/24` | `192.168.1.1` | Switch 1 |
-| **Chisa** | Client | `eth0` | `192.168.2.2/24` | `192.168.2.1` | Switch 2 |
-| **Knights** | Client | `eth0` | `192.168.3.2/24` | `192.168.3.1` | Switch 3 |
-| **Eiri** | Client | `eth0` | `192.168.3.3/24` | `192.168.3.1` | Switch 3 |
+|  |  | `eth1` | `192.233.1.1/24` | - | Switch 1 |
+|  |  | `eth2` | `192.233.2.1/24` | - | Switch 2 |
+|  |  | `eth3` | `192.233.3.1/24` | - | Switch 3 |
+| **Alice** | Client | `eth0` | `192.233.1.2/24` | `192.233.1.1` | Switch 1 |
+| **Mika** | Client | `eth0` | `192.233.1.3/24` | `192.233.1.1` | Switch 1 |
+| **Chisa** | Client | `eth0` | `192.233.2.2/24` | `192.233.2.1` | Switch 2 |
+| **Knights** | Client | `eth0` | `192.233.3.2/24` | `192.233.3.1` | Switch 3 |
+| **Eiri** | Client | `eth0` | `192.233.3.3/24` | `192.233.3.1` | Switch 3 |
 
 ---
 
@@ -48,26 +52,25 @@ Sesuai **Aturan Praktikum Poin 5**, semua script wajib diletakkan di direktori `
 
 Buka console node **Lain**, buat script `/root/setup_lain.sh`:
 
-```bash
+```sh
 cat << 'EOF' > /root/setup_lain.sh
-#!/bin/bash
+#!/bin/sh
 
 # Atur IP Address pada interface internal
-ip addr add 192.168.1.1/24 dev eth1
+ip addr add 192.233.1.1/24 dev eth1
 ip link set dev eth1 up
 
-ip addr add 192.168.2.1/24 dev eth2
+ip addr add 192.233.2.1/24 dev eth2
 ip link set dev eth2 up
 
-ip addr add 192.168.3.1/24 dev eth3
+ip addr add 192.233.3.1/24 dev eth3
 ip link set dev eth3 up
 
 echo "Konfigurasi IP pada Router Lain selesai."
 EOF
 
 chmod +x /root/setup_lain.sh
-bash /root/setup_lain.sh
-
+sh /root/setup_lain.sh
 ```
 
 ---
@@ -76,20 +79,18 @@ bash /root/setup_lain.sh
 
 Buka console node **Alice**, buat script `/root/setup_alice.sh`:
 
-```bash
+```sh
 cat << 'EOF' > /root/setup_alice.sh
-#!/bin/bash
+#!/bin/sh
 
-ip addr add 192.168.1.2/24 dev eth0
+ip addr add 192.233.1.2/24 dev eth0
 ip link set dev eth0 up
-ip route add default via 192.168.1.1
 
 echo "Konfigurasi IP Alice selesai."
 EOF
 
 chmod +x /root/setup_alice.sh
-bash /root/setup_alice.sh
-
+sh /root/setup_alice.sh
 ```
 
 ---
@@ -98,20 +99,19 @@ bash /root/setup_alice.sh
 
 Buka console node **Mika**, buat script `/root/setup_mika.sh`:
 
-```bash
+```sh
 cat << 'EOF' > /root/setup_mika.sh
-#!/bin/bash
+#!/bin/sh
 
-ip addr add 192.168.1.3/24 dev eth0
+ip addr add 192.233.1.3/24 dev eth0
 ip link set dev eth0 up
-ip route add default via 192.168.1.1
+ip route add default via 192.233.1.1
 
 echo "Konfigurasi IP Mika selesai."
 EOF
 
 chmod +x /root/setup_mika.sh
-bash /root/setup_mika.sh
-
+sh /root/setup_mika.sh
 ```
 
 ---
@@ -120,20 +120,19 @@ bash /root/setup_mika.sh
 
 Buka console node **Chisa**, buat script `/root/setup_chisa.sh`:
 
-```bash
+```sh
 cat << 'EOF' > /root/setup_chisa.sh
-#!/bin/bash
+#!/bin/sh
 
-ip addr add 192.168.2.2/24 dev eth0
+ip addr add 192.233.2.2/24 dev eth0
 ip link set dev eth0 up
-ip route add default via 192.168.2.1
+ip route add default via 192.233.2.1
 
 echo "Konfigurasi IP Chisa selesai."
 EOF
 
 chmod +x /root/setup_chisa.sh
-bash /root/setup_chisa.sh
-
+sh /root/setup_chisa.sh
 ```
 
 ---
@@ -142,20 +141,19 @@ bash /root/setup_chisa.sh
 
 Buka console node **Knights**, buat script `/root/setup_knights.sh`:
 
-```bash
+```sh
 cat << 'EOF' > /root/setup_knights.sh
-#!/bin/bash
+#!/bin/sh
 
-ip addr add 192.168.3.2/24 dev eth0
+ip addr add 192.233.3.2/24 dev eth0
 ip link set dev eth0 up
-ip route add default via 192.168.3.1
+ip route add default via 192.233.3.1
 
 echo "Konfigurasi IP Knights selesai."
 EOF
 
 chmod +x /root/setup_knights.sh
-bash /root/setup_knights.sh
-
+sh /root/setup_knights.sh
 ```
 
 ---
@@ -164,20 +162,19 @@ bash /root/setup_knights.sh
 
 Buka console node **Eiri**, buat script `/root/setup_eiri.sh`:
 
-```bash
+```sh
 cat << 'EOF' > /root/setup_eiri.sh
-#!/bin/bash
+#!/bin/sh
 
-ip addr add 192.168.3.3/24 dev eth0
+ip addr add 192.233.3.3/24 dev eth0
 ip link set dev eth0 up
-ip route add default via 192.168.3.1
+ip route add default via 192.233.3.1
 
 echo "Konfigurasi IP Eiri selesai."
 EOF
 
 chmod +x /root/setup_eiri.sh
-bash /root/setup_eiri.sh
-
+sh /root/setup_eiri.sh
 ```
 
 ---
@@ -186,106 +183,90 @@ bash /root/setup_eiri.sh
 
 Untuk memastikan Soal 1 selesai dengan baik, jalankan perintah berikut di masing-masing node:
 
-* Pada **Router Lain**:
-```bash
-ip -br a
+* Pada **Router Lain** dan **Client**:
 
+```sh
+ip -br a
 ```
 
+![](./assets/01-Lain,Alice,Mika,Chisa.png)
 
-*Pastikan `eth1`, `eth2`, dan `eth3` sudah terpasang IP masing-masing.*
-* Pada **Client (misal Alice / Knights)**:
-```bash
-ip -br a
-ip route
-
-```
-
-
-*Pastikan IP sudah sesuai subnet dan `default via` menunjuk ke IP interface router Lain yang sesuai.*
+![](./assets/01-Knights,Eiri.png)
 
 ---
 
-Mantap! Lanjut ke **Nomor 2** untuk menyambungkan router Lain ke internet publik lewat DHCP pada interface `eth0`.
+## **Soal 2: Konfigurasi Lain ke Public Network**
 
-Jalankan script ini di node **Router Lain** (`/root/setup_nat_dhcp.sh`):
+Jalankan script ini di node **Router Lain** (`/root/setup_lain.sh`):
 
-```bash
-cat << 'EOF' > /etc/network/interfaces
-auto lo
-iface lo inet loopback
+```sh
+cat << 'EOF' >> /root/setup_lain.sh
 
-auto eth0
-iface eth0 inet dhcp
+# Aktifkan eth0 dan minta IP via DHCP
+ip link set dev eth0 up
+udhcpc -i eth0
 
-auto eth1
-iface eth1 inet static
-    address 192.233.1.1
-    netmask 255.255.255.0
-
-auto eth2
-iface eth2 inet static
-    address 192.233.2.1
-    netmask 255.255.255.0
-
-auto eth3
-iface eth3 inet static
-    address 192.233.3.1
-    netmask 255.255.255.0
+echo "Konfigurasi DHCP Router Lain selesai."
 EOF
 
-service networking restart
-
+sh /root/setup_lain.sh
 ```
 
-**Cara Verifikasi:**
-Jalankan perintah `ping -c 4 8.8.8.8` di terminal Router Lain. Jika muncul respons *reply*, berarti interface `eth0` berhasil mendapatkan IP DHCP dan terhubung ke internet.
+`udhcpc -i eth0`: Perintah ini akan meminta IP, default gateway, dan DNS otomatis dari server DHCP ke interface eth0.
+
+Jalankan perintah `ping -c 5 8.8.8.8` di terminal Router Lain. Jika muncul respons *reply*, berarti interface `eth0` berhasil mendapatkan IP DHCP dan terhubung ke internet.
+
+![](./assets/02-Ping8888-Lain.png)
 
 ---
 
-Modulnya sudah tersimpan. Sekarang kita lanjut ke **Nomor 3**.
+## **Soal 3: Komunikasi Antar Client**
 
 Pada nomor 3, tujuannya membuat seluruh Entitas (Alice, Mika, Chisa, Knights, Eiri) saling terhubung lintas subnet via router Lain. Karena ketiga switch terhubung langsung ke port router (`eth1`, `eth2`, `eth3`), kamu cukup mengaktifkan **Kernel IP Forwarding** di Router Lain.
 
+---
+
 **Konfigurasi di Node Router Lain**
 
-Jalankan perintah ini di terminal Router Lain:
+* **Router Lain:**
 
-```bash
+```sh
 sysctl -w net.ipv4.ip_forward=1
-
 ```
 
-Agar fitur forwarding ini tidak hilang saat router di-restart, tambahkan baris `up sysctl -w net.ipv4.ip_forward=1` ke file `/etc/network/interfaces`:
+**Konfigurasi di Node Client**
 
-```bash
-cat << 'EOF' > /etc/network/interfaces
-auto lo
-iface lo inet loopback
+* **Node Alice** (Subnet `eth1` - `192.233.1.0/24`)
 
-auto eth0
-iface eth0 inet dhcp
-    up sysctl -w net.ipv4.ip_forward=1
-
-auto eth1
-iface eth1 inet static
-    address 192.233.1.1
-    netmask 255.255.255.0
-
-auto eth2
-iface eth2 inet static
-    address 192.233.2.1
-    netmask 255.255.255.0
-
-auto eth3
-iface eth3 inet static
-    address 192.233.3.1
-    netmask 255.255.255.0
-EOF
-
-service networking restart
-
+```sh
+ip route add default via 192.233.1.1
 ```
+
+* **Node Mika** (Subnet `eth1` - `192.233.1.0/24`)
+
+```sh
+ip route add default via 192.233.1.1
+```
+
+* **Node Chisa** (Subnet `eth2` - `192.233.2.0/24`)
+
+```sh
+ip route add default via 192.233.2.1
+```
+
+* **Node Knights** (Subnet `eth3` - `192.233.3.0/24`)
+
+```sh
+ip route add default via 192.233.3.1
+```
+
+* **Node Eiri** (Subnet `eth3` - `192.233.3.0/24`)
+
+```sh
+ip route add default via 192.233.3.1
+```
+
+---
 
 **Cara Verifikasi Nomor 3**
 
@@ -296,24 +277,78 @@ Lakukan uji tes koneksi silang antar-subnet. Coba jalankan perintah berikut di t
 
 Jika paket *reply* diterima, konfigurasi routing antar-entitas sudah berhasil.
 
-Kabari kalau ping antar-client sudah jalan, nanti kita lanjut ke Nomor 4 (NAT Masquerade & DNS Client)!
+![](./assets/03-Alice-Ping-Chisa,Eiri.png)
 
 ---
 
-Konfigurasi Nomor 4 dibagi menjadi dua bagian: mengatur **NAT Masquerade** di Router Lain dan mendaftarkan **DNS Resolver** di setiap node Client.
+## **Soal 4: NAT Masquerade dan DNS Resolver**
+
+Mengatur **NAT Masquerade** di Router Lain dan mendaftarkan **DNS Resolver** di setiap node Client.
+
+---
 
 **1. Konfigurasi NAT Masquerade di Router Lain**
 
 Jalankan perintah `iptables` ini di terminal **Router Lain** agar paket IP privat dari semua client disamarkan menggunakan IP `eth0` saat keluar ke internet:
 
-```bash
+```sh
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-
 ```
 
-Agar rule NAT ini otomatis dipasang setiap kali network restart, masukkan perintah tersebut ke file `/etc/network/interfaces` di Router Lain:
+---
 
-```bash
+**2. Konfigurasi DNS Resolver di Setiap Node Client**
+
+Jalankan perintah berikut di terminal **semua Client** (Alice, Mika, Chisa, Knights, dan Eiri) untuk mengeset DNS resolver ke `8.8.8.8`:
+
+```sh
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
+```
+
+---
+
+**3. Verifikasi Konektivitas Client**
+
+Buka terminal di salah satu client (misalnya **Alice** atau **Mika**) dan uji konektivitas internetnya:
+
+* Ping IP publik: `ping -c 3 8.8.8.8`
+
+* Ping domain web: `ping -c 3 google.com`
+
+![](./assets/02-Ping8888-Lain,Alice,Mika,Chisa.png)
+
+![](./assets/02-Ping8888-Knights,Eiri.png)
+
+![](./assets/04-PingGoogle-Lain,Alice,Mika,Chisa.png)
+
+![](./assets/04-PingGoogle-Knights,Eiri.png)
+
+---
+
+## **Soal 5: Skrip Verifikasi dan Persistensi Konfigurasi**
+
+**1. Buat Script `/root/cek_status.sh**`
+
+```sh
+cat << 'EOF' > /root/cek_status.sh
+#!/bin/bash
+echo "=== RINGKASAN INTERFACE ==="
+ip -br a
+echo ""
+echo "=== STATUS TABEL NAT ==="
+iptables -t nat -L -v -n
+EOF
+
+chmod +x /root/cek_status.sh
+```
+
+---
+
+**2. Verifikasi Persistensi Konfigurasi**
+
+* **Router Lain:**
+
+```sh
 cat << 'EOF' > /etc/network/interfaces
 auto lo
 iface lo inet loopback
@@ -340,117 +375,144 @@ iface eth3 inet static
 EOF
 
 service networking restart
-
 ```
 
-**2. Konfigurasi DNS Resolver di Setiap Node Client**
+* **Client Alice** (Subnet `eth1` - Gateway `192.233.1.1`)
 
-Jalankan perintah berikut di terminal **semua Client** (Alice, Mika, Chisa, Knights, dan Eiri) untuk mengeset DNS resolver ke `8.8.8.8`:
-
-```bash
-echo "nameserver 8.8.8.8" > /etc/resolv.conf
-
-```
-
-**3. Verifikasi Konektivitas Client**
-
-Buka terminal di salah satu client (misalnya **Alice** atau **Mika**) dan uji konektivitas internetnya:
-
-* Ping IP publik: `ping -c 3 8.8.8.8`
-
-* Ping domain web: `ping -c 3 google.com`
-
-
-Kalau keduanya memberikan balasan *reply*, berarti Nomor 4 sudah beres. Mau langsung lanjut ke Nomor 5 untuk bikin script `/root/cek_status.sh`?
-
----
-
-Berikut cara pengerjaan **Nomor 5** pada node **Router Lain**:
-
-**1. Buat Script `/root/cek_status.sh**`
-
-Jalankan perintah berikut di terminal Router Lain untuk membuat script verifikasi sesuai permintaan soal:
-
-```bash
-cat << 'EOF' > /root/cek_status.sh
-#!/bin/bash
-echo "=== RINGKASAN INTERFACE ==="
-ip -br a
-echo ""
-echo "=== STATUS TABEL NAT ==="
-iptables -t nat -L -v -n
-EOF
-
-chmod +x /root/cek_status.sh
-
-```
-
-**2. Verifikasi Persistensi Konfigurasi**
-
-Pastikan file `/etc/network/interfaces` di Router Lain sudah memuat opsi `up` agar IP forwarding dan NAT Masquerade tidak hilang saat di-restart:
-
-```bash
+```sh
 cat << 'EOF' > /etc/network/interfaces
 auto lo
 iface lo inet loopback
 
 auto eth0
-iface eth0 inet dhcp
-    up sysctl -w net.ipv4.ip_forward=1
-    up iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-
-auto eth1
-iface eth1 inet static
-    address 192.233.1.1
+iface eth0 inet static
+    address 192.233.1.2
     netmask 255.255.255.0
-
-auto eth2
-iface eth2 inet static
-    address 192.233.2.1
-    netmask 255.255.255.0
-
-auto eth3
-iface eth3 inet static
-    address 192.233.3.1
-    netmask 255.255.255.0
+    gateway 192.233.1.1
 EOF
 
+service networking restart
 ```
+
+---
+
+* **Client Mika** (Subnet `eth1` - Gateway `192.233.1.1`)
+
+```sh
+cat << 'EOF' > /etc/network/interfaces
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+    address 192.233.1.3
+    netmask 255.255.255.0
+    gateway 192.233.1.1
+EOF
+
+service networking restart
+```
+
+---
+
+* **Client Chisa** (Subnet `eth2` - Gateway `192.233.2.1`)
+
+```sh
+cat << 'EOF' > /etc/network/interfaces
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+    address 192.233.2.2
+    netmask 255.255.255.0
+    gateway 192.233.2.1
+EOF
+
+service networking restart
+```
+
+---
+
+* **Client Knights** (Subnet `eth3` - Gateway `192.233.3.1`)
+
+```sh
+cat << 'EOF' > /etc/network/interfaces
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+    address 192.233.3.2
+    netmask 255.255.255.0
+    gateway 192.233.3.1
+EOF
+
+service networking restart
+```
+
+---
+
+* **Client Eiri** (Subnet `eth3` - Gateway `192.233.3.1`)
+
+```sh
+cat << 'EOF' > /etc/network/interfaces
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+    address 192.233.3.3
+    netmask 255.255.255.0
+    gateway 192.233.3.1
+EOF
+
+service networking restart
+```
+
+---
 
 **3. Pengujian**
 
 Jalankan script verifikasi dengan perintah:
 
-```bash
+```sh
 /root/cek_status.sh
-
 ```
 
-Coba *restart* node Router Lain di GNS3, lalu jalankan kembali `/root/cek_status.sh`. Jika daftar interface dan aturan `MASQUERADE` tetap muncul setelah reboot, berarti Nomor 5 sudah selesai.
+Coba *restart* node Router Lain di GNS3, lalu jalankan kembali `/root/cek_status.sh`. Jika daftar interface dan aturan `MASQUERADE` tetap muncul setelah reboot, berarti sudah benar.
 
-Mau lanjut ke Nomor 6 (packet sniffing DNS/ICMP di node Mika)?
+![](./assets/05-Cek_Status.png)
 
 ---
 
-Jalankan script generator tersebut di node **Mika** dan tangkap paketnya menggunakan Wireshark.
+## **Soal 6: Packet Sniffing**
 
-**1. Eksekusi Generator Trafik di Node Mika**
+**1. Persiapan & Pembuatan Skrip di Node Mika**
 
-Buat dan jalankan file script `traffic_protocol7.sh` di folder `/root` node Mika:
+Pastikan paket `bind-tools` sudah terinstal di node Mika agar perintah `dig` dan `nslookup` dapat dijalankan. Gunakan `#!/bin/sh` agar kompatibel penuh dengan Alpinet.
 
-```bash
+Jalankan perintah ini di terminal **Mika**:
+
+```sh
+# Install tools DNS (dig dan nslookup) di Alpinet
+apk add bind-tools
+
+# Buat berkas traffic_protocol7.sh
 cat << 'EOF' > /root/traffic_protocol7.sh
-#!/bin/bash
+#!/bin/sh
 echo "============================================"
 echo "  Protocol 7 Traffic Generator v2026"
 echo "  Node: Mika Iwakura"
 echo "============================================"
 echo "[*] Generating DNS & ICMP traffic..."
 
+# ICMP Traffic
 ping -c 5 8.8.8.8 &
 ping -c 5 1.1.1.1 &
 ping -c 3 its.ac.id &
 
+# DNS Queries
 nslookup google.com 8.8.8.8 &
 nslookup its.ac.id 8.8.8.8 &
 nslookup github.com 1.1.1.1 &
@@ -463,90 +525,61 @@ echo "[*] Check Wireshark for captured packets."
 EOF
 
 chmod +x /root/traffic_protocol7.sh
-/root/traffic_protocol7.sh
-
 ```
 
-**2. Packet Sniffing & Display Filter di Wireshark**
+---
 
-1. Klik kanan pada link kabel antara **Mika** dan **Switch 1** di GNS3, lalu pilih **Start capture**.
+**2. Langkah Kerja Packet Sniffing di Wireshark**
 
+1. Klik kanan pada link kabel antara **Mika (eth0)** dan **Switch 1** di canvas GNS3, lalu pilih **Start capture**.
 
-2. Buka Wireshark, lalu masukkan perintah filter ini pada baris *Display Filter*:
+2. Buka terminal node **Mika**, lalu jalankan skrip generator:
+```bash
+sh /root/traffic_protocol7.sh
+```
 
-
+3. Setelah eksekusi skrip selesai, buka jendela Wireshark lalu masukkan perintah berikut pada bagian *Display Filter*:
 ```text
 dns or icmp
-
 ```
 
+---
 
+**3. Ringkasan Paket yang Lolos Filter**
 
-**3. Ringkasan Paket yang Lolos Filter (Untuk Laporan Resmi)**
+![](./assets/06-DNS&ICMP_Traffic.png)
 
-* **Trafik ICMP**:
-* 5 paket Echo Request & 5 Echo Reply ke `8.8.8.8`.
+* **Identitas Node Klien**: Node Mika (`192.233.1.3`).
 
+* **Trafik ICMP (Ping)**:
+* 5 pasang *Echo Request* dan *Echo Reply* ke IP `8.8.8.8`.
+* 5 pasang *Echo Request* dan *Echo Reply* ke IP `1.1.1.1`.
+* 3 pasang *Echo Request* dan *Echo Reply* ke host `its.ac.id` (`103.94.189.5`).
 
-* 5 paket Echo Request & 5 Echo Reply ke `1.1.1.1`.
-
-
-* 3 paket Echo Request & 3 Echo Reply ke host `its.ac.id`.
-
-
-
-
-* **Trafik DNS**:
-* Standard Query & Response (Record A) untuk domain `google.com` dan `its.ac.id` via DNS Server `8.8.8.8`.
-
-
-* Standard Query & Response (Record A) untuk domain `github.com` via DNS Server `1.1.1.1`.
-
-
-* Query `dig` Record A untuk `example.com` via `8.8.8.8`.
-
-
-* Query `dig` Record AAAA (IPv6) untuk `cloudflare.com` via `1.1.1.1`.
-
-
-
-
-
-Ambil *screenshot* tampilan Wireshark yang sudah terfilter `dns or icmp` untuk dilampirkan.
-
-![](./assets/6.png)
-
+* **Trafic DNS (Domain Name System)**:
+* *Standard Query* & *Response* (Record A) untuk domain `google.com` dan `its.ac.id` via DNS Server `8.8.8.8`.
+* *Standard Query* & *Response* (Record A) untuk domain `github.com` via DNS Server `1.1.1.1`.
+* *Standard Query* & *Response* (`dig` Record A) untuk domain `example.com` via DNS Server `8.8.8.8`.
+* *Standard Query* & *Response* (`dig` Record AAAA IPv6) untuk domain `cloudflare.com` via DNS Server `1.1.1.1`.
 
 ---
 
-Yap, screenshot Wireshark kamu buat nomor 6 udah 100% bener! Semua trafik DNS dan ICMP hasil eksekusi `traffic_protocol7.sh` udah berhasil tersaring dengan rapi.
-
-Sekarang kita lanjut ke **Nomor 7**. Di nomor ini kamu diminta setup **FTP Server (`vsftpd`)** di node **Chisa** dengan aturan:
-
-* Shared folder: `/var/wired/data`
-
-* User `alice`: Hak akses Read & Write
-
-
-* User `mika`: Hak akses Read-only
-
-
-* User `eiri`: Di-blacklist (tidak bisa login)
-
-
+Berikut penyesuaian lengkap dokumen **Soal 7 (FTP Server)** yang sudah disesuaikan dengan penggunaan *tool* **`lftp`** pada Alpinet beserta hasil eksekusi aktualnya:
 
 ---
 
-### 1. Konfigurasi di Node Chisa
+## **Soal 7: FTP Server (`vsftpd`)**
 
-Jalankan script ini di terminal **Chisa** (`192.233.2.2`) buat install `vsftpd`, buat user, dan atur hak aksesnya:
+### 1. Konfigurasi FTP Server di Node Chisa (`192.233.2.2`)
 
-```bash
+Jalankan skrip ini di terminal **Chisa** untuk menginstal `vsftpd`, membuat direktori shared `/var/wired/data`, mengonfigurasi *userlist blacklist*, serta mengatur direktori konfigurasi per-*user* (`/etc/vsftpd_user_config`):
+
+```sh
 cat << 'EOF' > /root/setup_ftp_chisa.sh
 #!/bin/sh
 apk update && apk add vsftpd
 
-# Buat direktori penyimpanan data
+# Buat direktori penyimpanan data dan secure chroot
 mkdir -p /var/wired/data
 mkdir -p /usr/share/vsftpd/empty
 chmod 777 /var/wired/data
@@ -561,7 +594,7 @@ echo "alice:alice123" | chpasswd
 echo "mika:mika123" | chpasswd
 echo "eiri:eiri123" | chpasswd
 
-# Konfigurasi utama vsftpd di Alpine
+# Konfigurasi utama vsftpd
 mkdir -p /etc/vsftpd
 cat << 'CONF' > /etc/vsftpd/vsftpd.conf
 anonymous_enable=NO
@@ -586,11 +619,11 @@ userlist_deny=YES
 user_config_dir=/etc/vsftpd_user_config
 CONF
 
-# Masukkan eiri ke daftar blacklist
+# Masukkan user eiri ke daftar blacklist
 echo "eiri" > /etc/vsftpd.userlist
 echo "eiri" >> /etc/ftpusers
 
-# Atur izin khusus per user (alice = RW, mika = Read-Only)
+# Atur izin khusus per user (alice = Read/Write, mika = Read-Only)
 mkdir -p /etc/vsftpd_user_config
 echo "write_enable=YES" > /etc/vsftpd_user_config/alice
 echo "write_enable=NO" > /etc/vsftpd_user_config/mika
@@ -598,67 +631,329 @@ echo "write_enable=NO" > /etc/vsftpd_user_config/mika
 # Restart daemon vsftpd
 pkill vsftpd || true
 vsftpd /etc/vsftpd/vsftpd.conf &
+echo "FTP Server vsftpd berhasil dikonfigurasi di Chisa."
 EOF
 
 chmod +x /root/setup_ftp_chisa.sh
-/root/setup_ftp_chisa.sh
-
+sh /root/setup_ftp_chisa.sh
 ```
 
 ---
 
-### 2. Cara Pembuktian & Verifikasi Soal Nomor 7
+### 2. Langkah Pengujian & Verifikasi Hak Akses Klien
 
-**A. Bukti 1: Membuat file `signal_alice.txt` dari node Alice (Read & Write)**
+Gunakan `lftp` di node klien karena lebih ringkas dan mendukung sintaks interaktif.
 
-Jalankan perintah ini di terminal node **Alice**:
-
-```bash
-# Buat file lokal di Alice
+**A. Verifikasi Hak Akses Read & Write di Node Alice**
+Jalankan perintah berikut di terminal **Alice**:
+```sh
+apk update && apk add lftp
 echo "Pesan rahasia dari Alice" > /root/signal_alice.txt
-
-# Login FTP ke Chisa dan upload file
-ftp 192.233.2.2
-
+lftp -u alice,alice123 192.233.2.2
 ```
 
-Saat diminta masukin kredensial:
-
-* User: `alice`
-* Password: `alice123`
-
-Setelah berhasil masuk prompt `ftp>`, ketik perintah berikut buat upload file:
-
+Setelah masuk ke *prompt* `lftp alice@192.233.2.2:~>`, jalankan:
 ```text
-put /root/signal_alice.txt signal_alice.txt
+put /root/signal_alice.txt
 ls
 quit
-
 ```
 
-*(Jika file `signal_alice.txt` berhasil ter-upload dan muncul pas `ls`, artinya hak akses `alice` bener)*.
+![](./assets/07-FTP_Alice.png)
+
+* **Hasil:** Terlihat respons `25 bytes transferred` dan file `signal_alice.txt` berhasil terunggah ke server.
+
+**B. Verifikasi User Blacklist di Node Eiri**
+Jalankan perintah berikut di terminal **Eiri**:
+```sh
+apk update && apk add lftp
+lftp -u eiri,eiri123 192.233.2.2
+```
+
+Setelah masuk ke *prompt* `lftp eiri@192.233.2.2:~>`, jalankan perintah:
+```text
+ls
+quit
+```
+
+![](./assets/07-FTP_Eiri.png)
+
+* **Hasil:** Server langsung memblokir akses login dengan pesan error `ls: Login failed: 530 Permission denied.`.
 
 ---
 
-**B. Bukti 2: Uji coba login dari node Eiri (Blacklist)**
+## **Soal 8: FTP Upload Knights Report**
 
-Jalankan perintah ini di terminal node **Eiri**:
+### 1. Skrip Automation pada Node Knights (`192.233.3.2`)
 
-```bash
-ftp 192.233.2.2
+Jalankan perintah ini di terminal node **Knights** untuk mengunggah berkas laporan `knights_report.txt` ke FTP Server Chisa (`192.233.2.2`) menggunakan kredensial `alice` dalam mode pasif (*passive mode*):
 
-```
+```sh
+cat << 'EOF' > /root/upload_knights_report.sh
+#!/bin/sh
+apk update && apk add lftp 2>/dev/null || true
 
-Saat diminta masukin kredensial:
+# Buat berkas laporan Knights
+cat << 'REPORT' > /root/knights_report.txt
+==================================================
+  KNIGHTS OF THE EASTERN CALCULUS — STATUS REPORT
+  Protocol 7 Surveillance Network
+  Classification: LEVEL 7 — EYES ONLY
+==================================================
 
-* User: `eiri`
-* Password: `eiri123`
-
-Server bakalan langsung nolak login dengan pesan respons: `530 Permission denied.` atau `Login incorrect.`. Ini ngebuktiin user `eiri` berhasil diblokir.
-
+Date: [CLASSIFIED]
+Agent: Knights Unit Alpha
+Node: Switch 3 — Subnet 192.233.3.0/24
 
 ---
- 
+
+SUBJECT: Network Reconnaissance Report
+
+The Wired has been successfully infiltrated through
+Protocol 7 channels. Current observations:
+
+1. Router "Lain" has been identified as the central
+   gateway node connecting all three subnet segments.
+
+2. Switch 1 (192.233.1.0/24) hosts Alice and Mika.
+   Both nodes show standard traffic patterns.
+
+3. Switch 2 (192.233.2.0/24) hosts Chisa alone.
+   Isolated subnet — minimal cross-traffic observed.
+
+4. Switch 3 (192.233.3.0/24) — our operational base.
+   Knights and Eiri coexist on this segment.
+
+RECOMMENDATION:
+Continue monitoring FTP and Telnet sessions for
+plaintext credential exposure. SSH tunnels remain
+impenetrable without keylog access.
+
+--- END OF REPORT ---
+Knights of the Eastern Calculus
+"Let's all love Lain."
+
+REPORT
+
+# Unggah berkas ke FTP Server Chisa via lftp (Passive Mode)
+lftp -u alice,alice123 192.233.2.2 << 'FTP'
+set ftp:passive-mode true
+put /root/knights_report.txt
+ls
+quit
+FTP
+EOF
+
+chmod +x /root/upload_knights_report.sh
+sh /root/upload_knights_report.sh
+```
+
+### 2. Langkah Kerja & Packet Sniffing
+
+1. Aktifkan fitur *packet capture* pada link kabel **Knights (eth0)** atau **Router Lain** di GNS3.
+2. Eksekusi skrip di terminal **Knights**:
+```sh
+sh /root/upload_knights_report.sh
+```
+
+3. Buka Wireshark, lalu gunakan *Display Filter* berikut pada baris penyaringan:
+```text
+ftp or ftp-data
+```
+
+### 3. Ringkasan Bukti Tangkapan Paket Wireshark (Untuk Laporan)
+
+![](./assets/08-227_Passive_Mode.png)
+
+* **Negosiasi Passive Mode (`227 Entering Passive Mode`)**:
+* Client Knights (`192.233.3.2`) mengirimkan perintah `PASV`.
+* FTP Server Chisa (`192.233.2.2`) merespons dengan `227 Entering Passive Mode (192,233,2,2,91,11)`. Port data pasif dibuka pada kombinasi oktet $91 \times 256 + 11 = 23307$.
+
+![](./assets/08-STOR_report_txt.png)
+
+* **Perintah Upload File (`STOR`)**:
+* Client mengirimkan perintah `Request: STOR knights_report.txt`.
+* Server membalas dengan `150 Ok to send data` lalu menerima *stream* data pada saluran `FTP-DATA`.
+
+![](./assets/08-226_Transfer_Complete.png)
+
+* **Konfirmasi Transfer Selesai (`226 Transfer complete`)**:
+* Setelah seluruh isi berkas terkirim, server memberikan respons `Response: 226 Transfer complete.`.
+
+---
+
+## **Soal 9: FTP Read-Only Test (Mika)**
+
+### 1. Konfigurasi File Manifesto di Server Chisa (`192.233.2.2`)
+
+Jalankan skrip ini di terminal **Chisa** untuk membuat berkas `protocol7_manifesto.txt` di dalam folder terbagi `/var/wired/data`:
+
+```sh
+cat << 'EOF' > /root/setup_manifesto_chisa.sh
+#!/bin/sh
+mkdir -p /var/wired/data
+
+cat << 'MANIFESTO' > /var/wired/data/protocol7_manifesto.txt
+==================================================
+  PROTOCOL 7 — THE MANIFESTO
+  A Declaration of Digital Consciousness
+  Serial Experiments Lain — Year 2026
+==================================================
+
+ARTICLE I: THE NATURE OF THE WIRED
+-----------------------------------
+The Wired is not merely a network of interconnected
+machines. It is the collective unconscious of
+humanity, rendered in packets and protocols.
+
+Every TCP handshake is a conversation.
+Every DNS query is a question.
+Every encrypted tunnel is a whispered secret.
+
+ARTICLE II: THE SEVEN PRINCIPLES
+----------------------------------
+1. All nodes are equal in the eyes of the router.
+2. No packet shall be dropped without cause.
+3. Encryption is the right of every connection.
+4. Plaintext protocols expose the vulnerable.
+5. The firewall protects, but also imprisons.
+6. NAT masquerade hides truth behind a single face.
+7. The Wired remembers everything — packet loss
+   is merely a temporary forgetting.
+
+ARTICLE III: THE PROPHECY OF LAIN
+-----------------------------------
+"If you're not remembered, then you never existed."
+
+In the world of networking, persistence is survival.
+A configuration that vanishes upon restart is a
+thought that was never truly committed to memory.
+
+Therefore: Save your iptables. Write your interfaces.
+Let your routing tables endure beyond the power cycle.
+
+ARTICLE IV: CONCERNING SECURITY
+---------------------------------
+Telnet is the glass house of protocols — transparent
+to any observer with a packet sniffer.
+
+SSH is the steel vault — its contents visible only
+to those who possess the key.
+
+Choose wisely which door you open to The Wired.
+
+---
+"No matter where you go, everyone's connected."
+— Lain Iwakura
+MANIFESTO
+
+echo "Berkas manifesto berhasil dibuat di /var/wired/data."
+EOF
+
+chmod +x /root/setup_manifesto_chisa.sh
+sh /root/setup_manifesto_chisa.sh
+```
+
+### 2. Langkah Kerja di Node Mika (`192.233.1.3`)
+
+Jika ingin menjalankan perintah satu per satu di terminal **Mika**:
+
+```sh
+# 1. Unduh file manifesto (Read Test)
+lftp -u mika,mika123 192.233.2.2
+get protocol7_manifesto.txt
+cat protocol7_manifesto.txt
+
+# 2. Coba unggah file baru (Write Test)
+put /root/test_mika.txt
+quit
+```
+
+### 3. Hasil Analisis
+
+![](./assets/09-protocol7_manifesto.png)
+
+**Ringkasan Hasil Pengujian (Untuk Laporan Resmi):**
+
+* **Uji Akses Baca (Read Test - `RETR`)**:
+* Node Mika mengirimkan perintah `RETR protocol7_manifesto.txt`.
+* Server Chisa merespons dengan `150 Opening BINARY mode data connection` lalu mengirimkan seluruh isi berkas sejumlah `1738 bytes transferred`.
+
+
+* **Uji Akses Tulis (Write Test - `STOR`)**:
+* Node Mika mencoba mengunggah berkas menggunakan perintah `STOR test_mika.txt`.
+* Server Chisa menolak proses tersebut dengan respons error:
+`Access failed: 550 Permission denied. (test_mika.txt)`.
+
+* Hal ini membuktikan bahwa konfigurasi *Read-Only* (`write_enable=NO`) untuk user `mika` pada `vsftpd` berjalan sesuai spesifikasi.
+
+Berikut adalah penyesuaian lengkap dokumen **Soal 10 (Custom ICMP Latency Test)** yang disesuaikan dengan skrip, parameter pengujian, serta bukti eksekusi terminal dan tangkapan paket Wireshark:
+
+---
+
+## **Soal 10: Custom ICMP Latency Test**
+
+### 1. Pengujian di Node Knights (`192.233.3.2`)
+
+Jalankan perintah ini di terminal **Knights**:
+
+```sh
+ping -c 77 -s 128 -i 0.3 192.233.2.2
+```
+
+**Penjelasan Parameter Perintah `ping`:**
+
+* **`-c 77`**: Mengirimkan tepat 77 paket *ICMP Echo Request*.
+* **`-s 128`**: Menentukan ukuran data *payload* sebesar 128 bytes (di luar ICMP header).
+* **`-i 0.3`**: Mengatur interval pengiriman antar paket menjadi 0,3 detik (300 ms).
+* **`192.233.2.2`**: IP tujuan target (node **Chisa** pada Subnet 2).
+
+### 2. Langkah Kerja & Packet Sniffing
+
+1. Aktifkan fitur *Start capture* pada link kabel **Knights (eth0)** atau **Chisa (eth0)** di canvas GNS3.
+
+2. Eksekusi skrip di terminal **Knights**:
+```sh
+sh /root/ping_custom_knights.sh
+```
+
+3. Buka jendela Wireshark dan masukkan filter berikut pada kolom *Display Filter*:
+```text
+icmp
+```
+
+
+### 3. Analisis & Ringkasan Hasil Pengujian
+
+![](./assets/10-Request&Reply-0.png)
+
+![](./assets/10-Request&Reply-1.png)
+
+**A. Hasil Ringkasan Statistik Terminal (Knights)**
+
+* **Transmitted / Received**: 77 paket dikirim dan 77 paket diterima lengkap.
+* **Packet Loss**: `0% packet loss` (seluruh paket berhasil bolak-balik tanpa ada yang hilang).
+* **Total Execution Time**: 2564 ms.
+* **Nilai RTT (Round-Trip Time)**:
+    * **Min**: 0.288 ms
+    * **Avg**: 0.656 ms
+    * **Max**: 1.259 ms
+    * **Mdev**: 0.178 ms
+
+**B. Hasil Analisis Paket pada Wireshark**
+
+![](./assets/10-Chisa-Ping-Package.png)
+
+![](./assets/10-Knights-RTT-Loss.png)
+
+
+* **Display Filter**: `icmp`.
+* **Total Length Info Frame**: Setiap paket *Echo Request* dan *Echo Reply* tercatat berukuran **170 bytes** di Wireshark.
+
+$$\text{Total Frame} = 128 \text{ (Payload)} + 8 \text{ (ICMP Header)} + 20 \text{ (IP Header)} + 14 \text{ (Ethernet Header)} = 170 \text{ bytes}$$
+
+* **TTL (Time to Live)**: Berjumlah **63** pada paket *reply* di sisi penerima karena telah melewati 1 kali *hop* pembatas (*Router Lain*).
+
 ## Soal 11 : Telnet
 
 ### Tujuan
@@ -849,8 +1144,144 @@ Pada port 22 dan 80 yang terbuka, Knights merespons SYN dari Alice dengan SYN-AC
 
 ---
 
-## Soal 13
+Berikut adalah penyesuaian lengkap dokumen **Soal 13 (OpenSSH Key-Based Authentication)** yang disesuaikan dengan lingkungan **Alpinet** (`/bin/sh`), langkah penyalinan kunci publik, serta analisis tangkapan paket Wireshark:
 
+---
+
+## **Soal 13: OpenSSH Key-Based Authentication**
+
+### 1. Konfigurasi SSH Server pada Node Knights (`192.233.3.2`)
+
+Jalankan skrip ini di terminal **Knights** untuk menginstal OpenSSH server, membuat user `mika_admin`, dan mematikan otentikasi berbasis kata sandi (`PasswordAuthentication no`):
+
+```sh
+cat << 'EOF' > /root/setup_ssh_knights.sh
+#!/bin/sh
+apk update && apk add openssh
+ssh-keygen -A
+
+# Buat user mika_admin dan direktori .ssh
+adduser -D mika_admin 2>/dev/null || true
+mkdir -p /home/mika_admin/.ssh
+
+# Konfigurasi sshd_config (Hanya izinkan Pubkey Authentication)
+cat << 'CONF' > /etc/ssh/sshd_config
+Port 22
+ListenAddress 0.0.0.0
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+PasswordAuthentication no
+PermitRootLogin yes
+CONF
+
+# Atur hak akses direktori & file authorized_keys
+touch /home/mika_admin/.ssh/authorized_keys
+chmod 755 /home/mika_admin
+chmod 700 /home/mika_admin/.ssh
+chmod 600 /home/mika_admin/.ssh/authorized_keys
+chown -R mika_admin:mika_admin /home/mika_admin/.ssh
+
+# Jalankan daemon sshd
+pkill sshd || true
+/usr/sbin/sshd
+echo "OpenSSH Server berhasil dikonfigurasi di Knights."
+EOF
+
+chmod +x /root/setup_ssh_knights.sh
+sh /root/setup_ssh_knights.sh
+```
+
+---
+
+### 2. Generate Pair Key pada Node Mika (`192.233.1.3`)
+
+Jalankan skrip ini di terminal **Mika** untuk membuat pasangan kunci SSH (Private Key & Public Key) tanpa *passphrase*:
+
+```sh
+cat << 'EOF' > /root/setup_ssh_mika.sh
+#!/bin/sh
+apk update && apk add openssh-client
+mkdir -p /root/.ssh
+chmod 700 /root/.ssh
+
+# Buat kunci SSH RSA 2048-bit
+ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa -q
+echo "Pasangan kunci SSH berhasil dibuat di Mika."
+EOF
+
+chmod +x /root/setup_ssh_mika.sh
+sh /root/setup_ssh_mika.sh
+```
+
+---
+
+### 3. Langkah Penyalinan Kunci Publik & Pengujian Login
+
+**A. Salin Public Key dari Mika ke Knights**
+Tampilkan isi berkas `id_rsa.pub` di node **Mika**:
+
+```sh
+cat /root/.ssh/id_rsa.pub
+```
+
+Salin (*copy*) seluruh string kunci publik yang muncul, lalu masukkan ke dalam berkas `authorized_keys` di node **Knights**:
+
+```sh
+echo "<PASTE_PUBLIC_KEY_MIKA_DI_SINI>" >> /home/mika_admin/.ssh/authorized_keys
+chown -R mika_admin:mika_admin /home/mika_admin/.ssh
+```
+
+**B. Pengujian Koneksi SSH dari Mika ke Knights**
+Jalankan perintah ini di terminal **Mika**:
+
+```sh
+ssh mika_admin@192.233.3.2
+```
+
+* **Hasil:** Mika dapat langsung masuk ke sistem Knights tanpa dimintai kata sandi.
+
+---
+
+### 4. Display Filter Wireshark & Langkah Packet Sniffing
+
+1. Aktifkan fitur *Start capture* pada link kabel **Mika (eth0)** atau **Switch 1** di canvas GNS3.
+2. Lakukan koneksi SSH dari Mika ke Knights.
+3. Buka Wireshark, lalu gunakan *Display Filter* berikut:
+```text
+ssh or tcp.port == 22
+```
+
+---
+
+### 5. Analisis Hasil Tangkapan Paket Wireshark
+
+![](./assets/13-SSH.png)
+
+Berdasarkan hasil penangkapan paket pada Wireshark (`13-SSH.png`):
+
+* **TCP 3-Way Handshake (Frame 3–5)**: Inisiasi koneksi TCP antara Mika (`192.233.1.3:38720`) dan Knights (`192.233.3.2:22`).
+
+* **Protocol Version Exchange (Frame 6 & 8)**:
+* Frame 6 (Client) & Frame 8 (Server) saling bertukar informasi versi protokol: `SSH-2.0-OpenSSH_10.2`.
+
+* **Key Exchange Init (Frame 11 & 13)**:
+* Klien dan server saling bertukar algoritma enkripsi yang didukung (`Client: Key Exchange Init` & `Server: Key Exchange Init`).
+
+* **PQ/T Hybrid Key Exchange & New Keys (Frame 14–18)**:
+* Kedua node melakukan negosiasi pertukaran kunci simetris (*Diffie-Hellman/Hybrid Key Exchange*).
+* Frame 15 & 18 menyisipkan pesan `New Keys, Encrypted packet`, menandakan bahwa seluruh komunikasi setelah poin ini resmi dienkripsi.
+
+* **Encrypted Data Transfer (Frame 16+)**:
+* Seluruh data otentikasi, perintah terminal, dan respons dari server terenkripsi penuh sebagai payload `Encrypted packet`.
+
+---
+
+### 6. Mengapa Kredensial Tidak Terlihat seperti pada Telnet?
+
+* **Telnet (Plaintext Protocol)**:
+Telnet tidak memiliki mekanisme enkripsi bawaan. Setiap tombol yang diketik (termasuk *username* dan *password*) dikirimkan langsung dalam bentuk teks terbuka (*plaintext*) di dalam *payload* TCP, sehingga dapat dibaca dengan mudah menggunakan *packet sniffer*.
+* **SSH (Encrypted Tunnel)**:
+SSH membentuk lorong aman (*encrypted tunnel*) terlebih dahulu melalui tahap **Key Exchange** sebelum proses otentikasi user dimulai. Otentikasi berbasis kunci (*Public Key*) tidak pernah mengirimkan berkas kunci privat atau kata sandi melalui jaringan, melainkan menggunakan pembuktian kriptografi (*digital signature*). Semua isi lalu lintas data setelah tahap *New Keys* terenkripsi secara simetris, sehingga *sniffer* hanya melihat ciphertext.
 ---
 
 ## Soal 14 — Analisis `wired_bruteforce.pcapng`
@@ -1401,21 +1832,248 @@ http.response
 
 ---
 
-## Soal 18
+## **Soal 18: Protocol 7 — SMB Lateral Transfer**
 
-| Flag | `KOMJAR26{SMB_Tr4nsf3r_kpOj6Kwh8azA32lpWii7iZ3ru}` |
+### **1. Langkah Kerja & Filter Wireshark**
+
+1. Buka berkas pcap `soal18_wired_smb_transfer.pcapng` menggunakan Wireshark.
+
+
+2. Gunakan *Display Filter* berikut untuk menyaring lalu lintas protokol file sharing SMB2:
+
+
+```text
+smb2
+
+```
+
+
+3. Amati paket *Tree Connect Request* & *Create Request* untuk mengidentifikasi rincian transfer berkas malware:
+
+
+* **Source IP (Attacker)**: Alamat IP host pengirim malware (`10.7.3.100`).
+
+
+* **Victim IP**: Alamat IP host penerima malware (`10.7.1.50`).
+
+
+* **Target Share / Directory**: Folder tujuan penulisan berkas (`system32` / `ADMIN$`).
+
+
+* **Malware Filename**: Nama berkas eksekusi yang ditransfer (`wired_trojan_payload.exe`).
+
+
+
+
+4. Jalankan perintah socket untuk memasukkan jawaban dan mendapatkan flag:
+
+
+```sh
+nc 10.4.89.247 3405
+
+```
+
+
 
 ---
 
-## Soal 19
+### **2. Hasil Analisis & Jawaban**
 
-| Flag | `KOMJAR26{SMTP_Ext0rt10n_ljhaA4kVFGHME79UJ16Dsvtj4}` |
+| Pertanyaan | Format | Hasil Identifikasi |
+| --- | --- | --- |
+| **File Sharing Protocol** | `string` | `smb2`<br> |
+| **Source IP (Attacker)** | `IP` | `10.7.3.100`<br> |
+| **Victim IP** | `IP` | `10.7.1.50`<br> |
+| **Target Directory** | `string` | `system32`<br> |
+| **Malware Filename** | `file.exe` | `wired_trojan_payload.exe`<br> |
 
 ---
 
-## Soal 20
+### **3. Verifikasi Socket & Flag**
 
-| Flag | `KOMJAR26{TLS_D3crypt_2NNInj3GnS9dnJCfsvLefyIyJ}` |
+```text
+nc 10.4.89.247 3405
+
+```
+
+| Item | Value |
+| --- | --- |
+| **Flag** | `KOMJAR26{SMB_Tr4nsf3r_kpOj6Kwh8azA32lpWii7iZ3ru}`<br> |
 
 ---
+
+## **Soal 19: Protocol 7 — SMTP Threat Inspection**
+
+### **1. Langkah Kerja & Filter Wireshark**
+
+1. Buka berkas pcap `soal19_wired_smtp_threat.pcapng` di Wireshark.
+
+
+2. Masukkan *Display Filter* berikut pada baris penyaringan:
+
+
+```text
+smtp
+
+```
+
+
+3. Cari paket transaksi email yang memuat perintah `DATA`.
+
+
+4. Klik kanan paket `DATA` → pilih **Follow** → **TCP Stream** untuk membaca seluruh badan pesan email pemerasan (*extortion email*).
+
+
+5. Identifikasi informasi ancaman dari isi pesan email:
+
+
+* **Victim Email**: Alamat email penerima/korban (`victim@protocol7.co.jp`).
+
+
+* **Stolen Password**: Kata sandi korban yang diklaim telah tercuri (`pr0tocol_7_user`).
+
+
+* **Malware Type**: Jenis malware yang diklaim menginfeksi komputer korban (`ransomware`).
+
+
+* **Deadline**: Jumlah hari batas waktu pembayaran 2 BTC (`3` hari / 72 jam).
+
+
+* **MailClientID**: Kode ID yang tercantum di bagian bawah email (`7719980706`).
+
+
+
+
+6. Jalankan perintah socket untuk memasukkan jawaban dan mengklaim flag:
+
+
+```sh
+nc 10.4.89.247 3406
+
+```
+
+
+
+---
+
+### **2. Hasil Analisis & Jawaban**
+
+| Pertanyaan | Format | Hasil Identifikasi |
+| --- | --- | --- |
+| **Victim Email** | `user@domain.com` | `victim@protocol7.co.jp`<br> |
+| **Stolen Password** | `string` | `pr0tocol_7_user`<br> |
+| **Malware Type** | `string` | `ransomware`<br> |
+| **Deadline (Days)** | `int` | `3`<br> |
+| **MailClientID** | `int` | `7719980706`<br> |
+
+---
+
+### **3. Verifikasi Socket & Flag**
+
+```text
+nc 10.4.89.247 3406
+
+```
+
+| Item | Value |
+| --- | --- |
+| **Flag** | `KOMJAR26{SMTP_Ext0rt10n_ljhaA4kVFGHME79UJ16Dsvtj4}`<br> |
+
+---
+
+## **Soal 20: Protocol 7 — TLS Decrypted Stream**
+
+### **1. Langkah Kerja & Filter Wireshark**
+
+1. Konfigurasikan kunci dekripsi pada Wireshark:
+
+
+* Buka menu **Edit** → **Preferences** → **Protocols** → **TLS**.
+
+
+* Pada bagian **(Pre)-Master-Secret log filename**, pilih dan masukkan berkas `keyslogfile.txt`.
+
+
+
+
+2. Buka berkas pcap `wired_tls_decrypt.pcapng`.
+
+
+3. Gunakan *Display Filter* berikut untuk menganalisis jabat tangan TLS:
+
+
+```text
+tls
+
+```
+
+
+4. Amati paket *Client Hello* & *Server Hello* untuk mendapatkan informasi koneksi terenkripsi:
+
+
+* **TLS Version**: Versi protokol TLS yang disepakati (`TLSv1.2`).
+
+
+* **Domain Name (SNI)**: Nama domain yang diminta oleh klien (`example.com`).
+
+
+* **HTTPS Server IP**: Alamat IP server HTTPS tujuan (`93.184.216.34`).
+
+
+
+
+5. Gunakan *Display Filter* berikut untuk melihat *payload* HTTP yang telah berhasil terdekripsi:
+
+
+```text
+http
+
+```
+
+
+6. Amati header HTTP request yang terdekripsi:
+
+
+* **User-Agent**: String *User-Agent* yang digunakan klien (`curl/7.62.0`).
+
+
+* **HTTP Method & Path**: Metode permintaan dan jalur direktori (`HEAD /`).
+
+
+
+
+7. Jalankan perintah socket untuk memasukkan jawaban dan mengambil flag:
+
+
+```sh
+nc 10.4.89.247 3407
+
+```
+
+
+
+---
+
+### **2. Hasil Analisis & Jawaban**
+
+| Pertanyaan | Format | Hasil Identifikasi |
+| --- | --- | --- |
+| **TLS Protocol Version** | `string` | `TLSv1.2`<br> |
+| **Domain Name (SNI / Host)** | `domain.com` | `example.com`<br> |
+| **HTTPS Server IP** | `IP` | `93.184.216.34`<br> |
+| **User-Agent String** | `string` | `curl/7.62.0`<br> |
+| **HTTP Request Method & Path** | `METHOD /path` | `HEAD /`<br> |
+
+---
+
+### **3. Verifikasi Socket & Flag**
+
+```text
+nc 10.4.89.247 3407
+
+```
+
+| Item | Value |
+| --- | --- |
+| **Flag** | `KOMJAR26{TLS_D3crypt_2NNInj3GnS9dnJCfsvLefyIyJ}`<br> |
 
